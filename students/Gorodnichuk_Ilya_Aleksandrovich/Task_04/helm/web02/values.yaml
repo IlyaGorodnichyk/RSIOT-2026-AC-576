@@ -1,0 +1,39 @@
+# Student info
+student:
+  fullName: "Gorodnichuk Ilya Aleksandrovich"
+  id: "22023"
+  group: "AS-576"
+  variant: "02"
+  course: "RSIOT"
+
+namespace: "app-as576-v02"
+replicas: 2
+port: 8082
+
+image:
+  repository: flask-app
+  tag: stu-22023-v02
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8082
+
+ingress:
+  enabled: true
+  className: nginx
+  host: "web02-app.local"  # для локального теста, можете изменить
+
+# SLO параметры
+slo:
+  availability: 99.6  # %
+  latencyP95: 275     # ms
+  error5xxThreshold: 1.5  # % за 10m
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

@@ -1,0 +1,55 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: alert-{{ .Release.Name }}
+  namespace: monitoring
+  labels:
+    app: {{ .Release.Name }}
+    org.bstu.student.fullname: {{ .Values.student.fullName | quote }}
+spec:
+  groups:
+    - name: web02-slo-alerts
+      rules:
+        # Alert: 5xx ошибки > 1.5% за 10 минут
+        - alert: High5xxErrorRate
+          expr: |
+            (
+              sum(rate(web02_http_requests_total{status=~"5.."}[10m]))
+              /
+              sum(rate(web02_http_requests_total[10m]))
+            ) > 0.015
+          for: 5m
+          labels:
+            severity: critical
+            slo: error_rate
+          annotations:
+            summary: "5xx error rate > 1.5% over 10m"
+            description: "Error rate is {{ $value | humanizePercentage }} for app {{ .Release.Name }}"
+
+        # Alert: P95 latency > 275ms
+        - alert: HighLatencyP95
+          expr: |
+            histogram_quantile(0.95, sum(rate(web02_http_request_latency_seconds_bucket[5m])) by (le, path)) > 0.275
+          for: 5m
+          labels:
+            severity: warning
+            slo: latency
+          annotations:
+            summary: "P95 latency > 275ms"
+            description: "P95 latency is {{ $value }}s for app {{ .Release.Name }}"
+
+        # Alert: Доступность < 99.6%
+        - alert: LowAvailability
+          expr: |
+            (
+              sum(rate(web02_http_requests_total{status!~"5.."}[5m]))
+              /
+              sum(rate(web02_http_requests_total[5m]))
+            ) < 0.996
+          for: 5m
+          labels:
+            severity: warning
+            slo: availability
+          annotations:
+            summary: "Availability below 99.6%"
+            description: "Current availability is {{ $value | humanizePercentage }}"

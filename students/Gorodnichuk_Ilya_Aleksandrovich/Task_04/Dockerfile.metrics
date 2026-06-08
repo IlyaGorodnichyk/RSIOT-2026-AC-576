@@ -1,0 +1,20 @@
+﻿FROM python:3.11-slim
+
+LABEL org.bstu.student.fullname="Gorodnichuk Ilya Aleksandrovich"
+LABEL org.bstu.student.id="22023"
+LABEL org.bstu.group="AS-576"
+LABEL org.bstu.variant="02"
+LABEL org.bstu.course="RSIOT"
+
+WORKDIR /app
+
+# Копируем requirements и устанавливаем зависимости
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем приложение
+COPY app_with_metrics.py app.py
+
+EXPOSE 9082
+
+CMD ["python", "app.py"]
