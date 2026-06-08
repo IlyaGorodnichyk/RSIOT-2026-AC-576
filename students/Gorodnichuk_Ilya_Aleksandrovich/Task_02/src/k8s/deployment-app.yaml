@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app02
+  namespace: web02
+  labels:
+    app: app02
+    org.bstu.student.fullname: "Gorodnichuk_Ilya_Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+    org.bstu.course: "RSIOT"
+    org.bstu.owner: "Gorodnichuk"
+    org.bstu.student.slug: "as-576-22023-v02"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: app02
+  template:
+    metadata:
+      labels:
+        app: app02
+    spec:
+      containers:
+        - name: app02
+          image: app02:as-576-22023-v02
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: app02-config
+            - secretRef:
+                name: app02-secret
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "192Mi"
+            limits:
+              cpu: "200m"
+              memory: "192Mi"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8082
+            initialDelaySeconds: 10
+            periodSeconds: 10

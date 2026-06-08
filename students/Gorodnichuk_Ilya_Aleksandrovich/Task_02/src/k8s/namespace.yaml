@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web02
+  labels:
+    org.bstu.student.fullname: "Gorodnichuk_Ilya_Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+    org.bstu.course: "RSIOT"
+    org.bstu.owner: "Gorodnichuk"
+    org.bstu.student.slug: "as-576-22023-v02"
