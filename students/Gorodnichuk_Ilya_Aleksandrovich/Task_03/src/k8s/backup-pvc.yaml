@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: state-as-576-22023-v02
+  labels:
+    org.bstu.student.fullname: "Gorodnichuk.Ilya.Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+spec:
+  storageClassName: storage-default
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

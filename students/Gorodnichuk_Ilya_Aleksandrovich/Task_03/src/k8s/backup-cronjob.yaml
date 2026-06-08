@@ -1,0 +1,65 @@
+# Обновите файл backup-cronjob.yaml с правильной командой
+@"
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-redis
+  namespace: state-as-576-22023-v02
+  labels:
+    org.bstu.student.fullname: "Gorodnichuk.Ilya.Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: redis-backup
+        spec:
+          containers:
+            - name: backup
+              image: redis:7-alpine
+              command:
+                - sh
+                - -c
+                - |
+                  REDIS_PASSWORD=\$(cat /etc/redis-password/password)
+                  echo "Starting backup at \$(date)"
+                  redis-cli -h db-redis -a "\$REDIS_PASSWORD" --no-auth-warning BGSAVE
+                  sleep 5
+                  redis-cli -h db-redis -a "\$REDIS_PASSWORD" --no-auth-warning SAVE
+                  BACKUP_FILE="/backup/redis-dump-\$(date +%Y%m%d-%H%M%S).rdb"
+                  cp /data/dump.rdb "\$BACKUP_FILE"
+                  echo "Backup completed: \$BACKUP_FILE"
+                  ls -lh /backup/
+              volumeMounts:
+                - name: redis-data
+                  mountPath: /data
+                - name: backup-storage
+                  mountPath: /backup
+                - name: redis-secret
+                  mountPath: /etc/redis-password
+                  readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+            - name: redis-data
+              persistentVolumeClaim:
+                claimName: data-db-redis-0
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: backup-pvc
+            - name: redis-secret
+              secret:
+                secretName: db-redis-secret
+                items:
+                  - key: REDIS_PASSWORD
+                    path: password
+"@ | Out-File -FilePath backup-cronjob.yaml -Encoding utf8
+
+# Примените обновленный CronJob
+kubectl apply -f backup-cronjob.yaml

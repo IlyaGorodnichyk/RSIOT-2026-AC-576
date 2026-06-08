@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restore-redis
+  namespace: state-as-576-22023-v02
+  labels:
+    org.bstu.student.fullname: "Gorodnichuk.Ilya.Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+spec:
+  template:
+    metadata:
+      labels:
+        app: redis-restore
+    spec:
+      containers:
+        - name: restore
+          image: redis:7-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Available backups:"
+              ls -lh /backup/
+              LATEST_BACKUP=$(ls -t /backup/redis-dump-*.rdb 2>/dev/null | head -1)
+              if [ -z "$LATEST_BACKUP" ]; then
+                echo "ERROR: No backup file found!"
+                exit 1
+              fi
+              echo "Restoring from: $LATEST_BACKUP"
+              cp "$LATEST_BACKUP" /data/dump.rdb
+              echo "Restore completed successfully!"
+              echo "File restored: $LATEST_BACKUP"
+              ls -lh /data/
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+            - name: backup-storage
+              mountPath: /backup
+      restartPolicy: Never
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: data-db-redis-0
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: backup-pvc
+  backoffLimit: 2

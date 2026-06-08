@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-redis
+  namespace: state-as-576-22023-v02
+  labels:
+    app: redis
+    org.bstu.student.fullname: "Gorodnichuk.Ilya.Aleksandrovich"
+    org.bstu.student.id: "22023"
+    org.bstu.group: "AS-576"
+    org.bstu.variant: "02"
+    org.bstu.course: "RSIOT"
+    org.bstu.owner: "Gorodnichuk.Ilya.Aleksandrovich"
+    org.bstu.student.slug: "AS-576-22023-v02"
+spec:
+  serviceName: db-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-redis-secret
+                  key: REDIS_PASSWORD
+            - name: STU_ID
+              value: "22023"
+            - name: STU_GROUP
+              value: "AS-576"
+            - name: STU_VARIANT
+              value: "02"
+          command: 
+            - redis-server
+            - --requirepass
+            - $(REDIS_PASSWORD)
+            - --appendonly
+            - "yes"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          org.bstu.student.fullname: "Gorodnichuk.Ilya.Aleksandrovich"
+      spec:
+        storageClassName: storage-default
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

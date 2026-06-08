@@ -1,0 +1,41 @@
+﻿=====================================
+Лабораторная работа 03 - Kubernetes StatefulSet
+=====================================
+Студент: Gorodnichuk Ilya Aleksandrovich
+Группа: AS-576
+ID: 22023
+Вариант: 02
+Дата: 06/08/2026 23:04:32
+
+=====================================
+РЕЗУЛЬТАТЫ ВЫПОЛНЕНИЯ
+=====================================
+
+1. StatefulSet статус:
+NAME       READY   AGE db-redis   1/1     4m21s
+
+2. Pods статус:
+NAME                  READY   STATUS      RESTARTS   AGE db-redis-0            1/1     Running     0          36s manual-backup-q86j5   0/1     Completed   0          86s restore-redis-j4cgr   0/1     Completed   0          38s
+
+3. PVC статус:
+NAME              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      VOLUMEATTRIBUTESCLASS   AGE backup-pvc        Bound    pvc-832da618-2db8-49ed-a499-9c49fa2f787b   5Gi        RWO            storage-default   <unset>                 4m21s data-db-redis-0   Bound    pvc-f64d2f14-304b-45c5-b7e5-fdef6ce6ed95   5Gi        RWO            storage-default   <unset>                 4m21s
+
+4. Services:
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE db-redis   ClusterIP   None         <none>        6379/TCP   4m21s
+
+5. CronJob:
+NAME           SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE backup-redis   0 * * * *   <none>     False     0        <none>          4m21s
+
+6. Secrets:
+NAME              TYPE     DATA   AGE db-redis-secret   Opaque   1      4m22s
+
+7. Тестовые данные в Redis:
+
+
+
+8. Бэкап файлы:
+
+
+=====================================
+ВЫВОД: Работа выполнена успешно!
+=====================================
