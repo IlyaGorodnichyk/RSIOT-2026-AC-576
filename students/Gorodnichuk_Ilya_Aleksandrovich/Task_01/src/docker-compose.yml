@@ -1,0 +1,46 @@
+services:
+  app:
+    build: .
+    container_name: app-w2
+    ports:
+      - "9082:9082"
+    environment:
+      STU_ID: "22023"
+      STU_GROUP: "AS-576"
+      STU_VARIANT: "w2"
+      DB_HOST: postgres
+      POSTGRES_DB: app_22023_vw2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - net-w2
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-w2
+    environment:
+      POSTGRES_DB: app_22023_vw2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - data_w2:/var/lib/postgresql/data
+    networks:
+      - net-w2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  data_w2:
+    name: data_w2
+
+networks:
+  net-w2:
+    name: net-w2
+    driver: bridge
